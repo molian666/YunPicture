@@ -7,7 +7,6 @@ import com.example.yunpicturebackend.constant.UserConstant;
 import com.example.yunpicturebackend.exception.BusinessException;
 import com.example.yunpicturebackend.exception.ErrorCode;
 import com.example.yunpicturebackend.manager.CosManager;
-import com.example.yunpicturebackend.model.enums.UserRoleEnum;
 import com.qcloud.cos.model.COSObject;
 import com.qcloud.cos.model.COSObjectInputStream;
 import lombok.extern.slf4j.Slf4j;

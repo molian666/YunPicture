@@ -1,28 +1,25 @@
-package com.example.yunpicturebackend.model.entity;
+package com.example.yunpicturebackend.model.dto.picture;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.example.yunpicturebackend.common.PageRequest;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Date;
-import lombok.Data;
+import java.util.List;
 
 /**
- * 图片
+ * 图片查询请求
  * @TableName picture
  */
-@TableName(value ="picture")
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class Picture implements Serializable {
-    /**
-     * id
-     */
-    @TableId(type = IdType.ASSIGN_ID)
-    private Long id;
+public class PictureQueryRequest extends PageRequest implements Serializable {
 
     /**
-     * 图片 url
+     * 图片id
      */
-    private String url;
+    private Long id;
 
     /**
      * 图片名称
@@ -40,9 +37,9 @@ public class Picture implements Serializable {
     private String category;
 
     /**
-     * 标签（JSON 数组）
+     * 标签
      */
-    private String tags;
+    private List<String> tags;
 
     /**
      * 图片体积
@@ -77,26 +74,9 @@ public class Picture implements Serializable {
     private Long userId;
 
     /**
-     * 创建时间
+     * 搜索关键词
      */
-    private Date createTime;
+    private String searchText;
 
-    /**
-     * 编辑时间
-     */
-    private Date editTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
-
-    /**
-     * 是否删除
-     */
-    @TableField(value = "isDelete")
-    private Integer isDelete;
-
-    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }
