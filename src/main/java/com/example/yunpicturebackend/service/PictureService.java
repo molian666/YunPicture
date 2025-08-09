@@ -3,6 +3,7 @@ package com.example.yunpicturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.yunpicturebackend.model.dto.picture.PictureQueryRequest;
+import com.example.yunpicturebackend.model.dto.picture.PictureUploadByBatchRequest;
 import com.example.yunpicturebackend.model.dto.picture.PictureUploadRequest;
 import com.example.yunpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -11,6 +12,7 @@ import com.example.yunpicturebackend.model.vo.PictureVO;
 import com.example.yunpicturebackend.model.vo.UserVO;
 import com.qcloud.cos.model.MultipartUpload;
 import org.springframework.web.multipart.MultipartFile;
+import com.example.yunpicturebackend.model.dto.picture.PictureReviewRequest;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -22,12 +24,12 @@ import javax.servlet.http.HttpServletRequest;
 public interface PictureService extends IService<Picture> {
     /**
      * 上传图片
-     * @param multipartFile
+     * @param inputSource
      * @param pictureUploadRequest
      * @param loginUser
      * @return
      */
-    PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, User loginUser);
+    PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser);
 
     /**
      * 获取查询条件
@@ -57,4 +59,32 @@ public interface PictureService extends IService<Picture> {
      * @param picture
      */
     void validPicture(Picture picture);
+
+    /**
+     * 图片审核
+     * @param pictureReviewRequest
+     * @param loginUser
+     */
+    void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
+
+    /**
+     * 填充审核参数
+     * @param picture
+     * @param loginUser
+     */
+    void fillReviewParams(Picture picture, User loginUser);
+
+    /**
+     * 批量抓取上传图片
+     * @param pictureUploadByBatchRequest
+     * @param loginUser
+     * @return
+     */
+    Integer UploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser);
+
+    /**
+     * 清理图片文件
+     * @param oldPicture
+     */
+    void clearPictureFile(Picture oldPicture);
 }

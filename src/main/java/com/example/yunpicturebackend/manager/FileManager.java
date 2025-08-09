@@ -27,9 +27,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * @Deprecated 弃用, 改用upload包的模板方法
+ */
 @Component
 @Slf4j
 @Service
+@Deprecated
 public class FileManager {
 
     @Resource
