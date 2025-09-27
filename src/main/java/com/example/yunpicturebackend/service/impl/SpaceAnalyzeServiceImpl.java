@@ -83,8 +83,18 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> imp
             spaceUsageAnalyzeResponse.setUsedCount(space.getTotalCount());
             spaceUsageAnalyzeResponse.setMaxSize(space.getMaxSize());
             //计算使用率
-            double sizeUsageRatio = NumberUtil.round(space.getTotalSize() *100.0 / (double) space.getMaxSize(), 2).doubleValue();
-            double countUsageRatio = NumberUtil.round(space.getTotalCount() *100.0 / (double) space.getMaxCount(), 2).doubleValue();
+            Double sizeUsageRatio = null;
+            Double countUsageRatio = null;
+            
+            // 避免除零错误，确保分母不为0或null
+            if (space.getMaxSize() != null && space.getMaxSize() > 0) {
+                sizeUsageRatio = NumberUtil.round(space.getTotalSize() * 100.0 / (double) space.getMaxSize(), 2).doubleValue();
+            }
+            
+            if (space.getMaxCount() != null && space.getMaxCount() > 0) {
+                countUsageRatio = NumberUtil.round(space.getTotalCount() * 100.0 / (double) space.getMaxCount(), 2).doubleValue();
+            }
+            
             spaceUsageAnalyzeResponse.setSizeUsageRatio(sizeUsageRatio);
             spaceUsageAnalyzeResponse.setCountUsageRatio(countUsageRatio);
             return spaceUsageAnalyzeResponse;

@@ -9,6 +9,7 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +32,11 @@ public class SpaceVO implements Serializable {
     private Integer spaceLevel;
 
     /**
+     * 空间类型：0-私有 1-团队
+     */
+    private Integer spaceType;
+
+    /**
      * 图片名称
      */
     private String spaceName;
@@ -38,22 +44,32 @@ public class SpaceVO implements Serializable {
     /**
      * 最大容量
      */
-    private Integer maxSize;
+    private Long maxSize;
 
     /**
      * 最大数量
      */
-    private Integer maxCount;
+    private Long maxCount;
 
     /**
      * 总容量
      */
-    private Integer totalSize;
+    private Long totalSize;
 
     /**
      * 总数量
      */
-    private Integer totalCount;
+    private Long totalCount;
+
+    /**
+     * 空间使用比例
+     */
+    private Double sizeUsageRatio;
+
+    /**
+     * 图片数量占比
+     */
+    private Double countUsageRatio;
 
     /**
      * 创建用户 id
@@ -84,6 +100,11 @@ public class SpaceVO implements Serializable {
      * 创建用户信息
      */
     private UserVO user;
+
+    /**
+     * 权限列表
+     */
+    private List<String> permissionList = new ArrayList<>();
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

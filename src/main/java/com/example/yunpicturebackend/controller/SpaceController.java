@@ -11,6 +11,7 @@ import com.example.yunpicturebackend.constant.UserConstant;
 import com.example.yunpicturebackend.exception.BusinessException;
 import com.example.yunpicturebackend.exception.ErrorCode;
 import com.example.yunpicturebackend.exception.ThrowUtils;
+import com.example.yunpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.example.yunpicturebackend.model.dto.space.SpaceAddRequest;
 import com.example.yunpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.example.yunpicturebackend.model.dto.space.SpaceUpdateRequest;
@@ -47,6 +48,9 @@ public class SpaceController {
 
     @Resource
     private SpaceService spaceService;
+
+    @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
 
 
     @PostMapping("/add")
@@ -142,8 +146,12 @@ public class SpaceController {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         //查询数据库
         Space space = spaceService.getById(id);
+        User loginUser = userService.getLoginUser(request);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
-        return ResultUtils.success(spaceService.getSpaceVO(space, request));
+        SpaceVO spaceVO = spaceService.getSpaceVO(space, request);
+        List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
+        spaceVO.setPermissionList(permissionList);
+        return ResultUtils.success(spaceVO);
     }
 
     /**

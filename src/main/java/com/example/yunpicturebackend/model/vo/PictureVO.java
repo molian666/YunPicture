@@ -121,6 +121,11 @@ public class PictureVO implements Serializable {
      */
     private UserVO user;
 
+    /**
+     * 权限列表
+     */
+    private List<String> permissionList;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
