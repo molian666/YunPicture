@@ -160,6 +160,8 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setPicScale(picScale);
         uploadPictureResult.setPicFormat(imageInfo.getFormat());
         uploadPictureResult.setPicColor(imageInfo.getAve());
+        // 当没有生成缩略图时，使用原图作为缩略图
+        uploadPictureResult.setThumbnailUrl(host + "/" + uploadPath);
         return uploadPictureResult;
     }
 
@@ -197,7 +199,5 @@ public abstract class PictureUploadTemplate {
             }
         }
     }
-
-
 
 }

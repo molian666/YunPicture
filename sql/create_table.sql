@@ -112,3 +112,22 @@ create table if not exists space_user
     INDEX idx_spaceId (spaceId),                    -- 提升按空间查询的性能
     INDEX idx_userId (userId)                       -- 提升按用户查询的性能
 ) comment '空间用户关联' collate = utf8mb4_unicode_ci;
+
+-- 创建默认分表，用于处理未分配空间的图片
+create table if not exists picture_0 like picture;
+
+-- 创建一些常用的分片表，避免在运行时出现表不存在的错误
+create table if not exists picture_1 like picture;
+create table if not exists picture_2 like picture;
+create table if not exists picture_3 like picture;
+create table if not exists picture_4 like picture;
+create table if not exists picture_5 like picture;
+create table if not exists picture_6 like picture;
+create table if not exists picture_7 like picture;
+create table if not exists picture_8 like picture;
+create table if not exists picture_9 like picture;
+create table if not exists picture_10 like picture;
+
+USE yun_picture; DESC picture_0;
+USE yun_picture; CREATE TABLE IF NOT EXISTS picture_1 LIKE picture; CREATE TABLE IF NOT EXISTS picture_2 LIKE picture; CREATE TABLE IF NOT EXISTS picture_3 LIKE picture;
+USE yun_picture; SHOW TABLES LIKE 'picture%';
