@@ -122,8 +122,8 @@ public class StpInterfaceImpl implements StpInterface {
                 throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "未找到图片信息");
             }
             spaceId = picture.getSpaceId();
-            // 公共图库，仅本人或管理员可操作
-            if (spaceId == null) {
+            // 公共图库（spaceId为null或-1），仅本人或管理员可操作
+            if (spaceId == null || spaceId == -1L) {
                 if (picture.getUserId().equals(userId) || userService.isAdmin(loginUser)) {
                     return ADMIN_PERMISSIONS;
                 } else {
@@ -135,7 +135,9 @@ public class StpInterfaceImpl implements StpInterface {
         // 获取 Space 对象
         Space space = spaceService.getById(spaceId);
         if (space == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "未找到空间信息");
+            // 如果空间不存在，记录警告日志并返回空权限列表而不是抛出异常
+            // 这种情况可能发生在空间被删除但图片记录仍引用它的情况下
+            return new ArrayList<>();
         }
         // 根据 Space 类型判断权限
         if (space.getSpaceType() == SpaceTypeEnum.PRIVATE.getValue()) {

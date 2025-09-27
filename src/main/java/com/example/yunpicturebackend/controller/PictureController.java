@@ -190,14 +190,16 @@ public class PictureController {
         // 空间权限校验
         Long spaceId = picture.getSpaceId();
         Space space = null;
-        if (spaceId != null) {
+        // 只有当spaceId不为null且不为-1时才进行空间权限检查（-1表示公共空间）
+        if (spaceId != null && spaceId != -1L) {
             boolean hasPermission = StpKit.SPACE.hasPermission(SpaceUserPermissionConstant.PICTURE_VIEW);
             ThrowUtils.throwIf(!hasPermission, ErrorCode.NO_AUTH_ERROR);
             // 已经改为使用注解鉴权
             // User loginUser = userService.getLoginUser(request);
             // pictureService.checkPictureAuth(loginUser, picture);
             space = spaceService.getById(spaceId);
-            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+            // 如果空间不存在，不抛出异常，而是继续处理
+            // 这种情况可能发生在空间被删除但图片记录仍引用它的情况下
         }
         // 获取权限列表
         User loginUser = userService.getLoginUser(request);

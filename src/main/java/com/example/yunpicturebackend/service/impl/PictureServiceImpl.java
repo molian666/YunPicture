@@ -161,7 +161,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         UploadPictureResult uploadPictureResult = pictureUploadTemplate.uploadPicture(inputSource, uploadPathPrefix);
         //构造入库图片信息
         Picture picture = new Picture();
-        picture.setSpaceId(spaceId);//指定空间id
+        // 对于公共空间（spaceId为null），使用-1作为标识，避免ShardingSphere处理null值时出现路由问题
+        Long actualSpaceId = (spaceId == null) ? -1L : spaceId;
+        picture.setSpaceId(actualSpaceId);//指定空间id
         picture.setUrl(uploadPictureResult.getUrl());
         picture.setThumbnailUrl(uploadPictureResult.getThumbnailUrl());
         String picName = uploadPictureResult.getName();
@@ -178,7 +180,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         picture.setPicScale(uploadPictureResult.getPicScale());
         picture.setPicFormat(uploadPictureResult.getPicFormat());
         picture.setUserId(loginUser.getId());
-        //补充审核参数
+        // 设置spaceId，确保分片算法可以正确路由
+        // 如果是公共空间，spaceId保持为null
+        // 如果是特定空间，spaceId设置为对应的空间ID
+        log.debug("图片上传 - spaceId: {}, 用户ID: {}", spaceId, loginUser.getId());
+        // 补充审核参数
         this.fillReviewParams(picture, loginUser);
         //操作数据库
         //如果图片id不为空表示更新，否则是新增
@@ -195,8 +201,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             if (!result) {
                 ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "图片上传失败，数据库操作失败");
             }
-            // 只有当spaceId不为null时才更新空间额度
-            if (finalSpaceId != null) {
+            // 只有当spaceId不为null且不为-1时才更新空间额度（-1表示公共空间）
+            if (finalSpaceId != null && finalSpaceId != -1L) {
                 boolean update = spaceService.lambdaUpdate()
                         .eq(Space::getId, finalSpaceId)
                         .setSql("totalSize = totalSize + " + picture.getPicSize())
@@ -250,8 +256,13 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         queryWrapper.like(StringUtils.isNotBlank(introduction), "introduction", introduction);
         queryWrapper.like(StringUtils.isNotBlank(category), "category", category);
         queryWrapper.eq(picSize != null, "picSize", picSize);
-        queryWrapper.eq(spaceId != null, "spaceId", spaceId);
-        queryWrapper.isNull(nullSpaceId, "spaceId");
+        // 处理spaceId查询：如果spaceId为null但不是nullSpaceId查询，则查询公共空间（spaceId=-1）
+        if (spaceId != null) {
+            queryWrapper.eq("spaceId", spaceId);
+        } else if (nullSpaceId) {
+            // 查询公共空间，现在使用-1标识
+            queryWrapper.eq("spaceId", -1L);
+        }
         queryWrapper.eq(picWidth != null, "picWidth", picWidth);
         queryWrapper.eq(picHeight != null, "picHeight", picHeight);
         queryWrapper.eq(picScale != null, "picScale", picScale);
@@ -488,8 +499,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             if (!result) {
                 ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "图片上传失败，数据库操作失败");
             }
-            // 只有当spaceId不为null时才更新空间额度
-            if (oldPicture.getSpaceId() != null) {
+            // 只有当spaceId不为null且不为-1时才更新空间额度（-1表示公共空间）
+            if (oldPicture.getSpaceId() != null && oldPicture.getSpaceId() != -1L) {
                 //更新额度 释放额度
                 boolean update = spaceService.lambdaUpdate()
                         .eq(Space::getId, oldPicture.getSpaceId())
@@ -535,14 +546,14 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     public void checkPictureAuth(Picture picture, User loginUser) {
         Long spaceId = picture.getSpaceId();
         Long loginUserId = loginUser.getId();
-        if (spaceId != null) {
-            //公共图库仅本人及管理员可操作
-            if (!userService.isAdmin(loginUser) && !loginUserId.equals(picture.getUserId())) {
+        if (spaceId != null && spaceId != -1L) {
+            //私有空间 管理员可操作
+            if (!userService.isAdmin(loginUser)) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
         } else {
-            //私有空间 管理员可操作
-            if (!userService.isAdmin(loginUser)) {
+            //公共图库（spaceId为null或-1）仅本人及管理员可操作
+            if (!userService.isAdmin(loginUser) && !loginUserId.equals(picture.getUserId())) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
         }
